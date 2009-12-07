@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="fr.gabuzomeu.networkwidget"
-      android:versionCode="3"
-      android:versionName="0.11">
+      android:versionName="0.12" android:versionCode="4">
     <application android:icon="@drawable/icon" android:label="@string/app_name">
 
 
@@ -14,7 +13,7 @@
     </intent-filter>
     
     <intent-filter>
-        <action android:name= "fr.gabuzomeu.NetworkWidget.TOGGLE_WIFI" />
+        <action android:name= "fr.gabuzomeu.NetworkWidget.WIFI_TOGGLE" />
         <data android:scheme="network_widget" />
      </intent-filter>
     
@@ -28,5 +27,6 @@
     <uses-sdk android:minSdkVersion="3" />
 <uses-permission android:name="android.permission.INTERNET" />
 <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+<uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
 <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
 </manifest> 

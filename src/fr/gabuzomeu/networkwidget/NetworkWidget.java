@@ -60,8 +60,18 @@ public class NetworkWidget extends AppWidgetProvider{
 			}
 			
 			
-		} else {	
-			Log.d( LOG_TAG, "Other Action");
+		} else if( WIFI_TOGGLE.equals(action)){
+			Log.d( LOG_TAG, "Toggle wifi");
+			WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+			if( !wifiManager.isWifiEnabled() )
+				wifiManager.setWifiEnabled( true);
+			else 
+				wifiManager.setWifiEnabled(false);
+		}
+		
+		
+		else {	
+			Log.d( LOG_TAG, "Other Action" + action.toString() );
 
 			super.onReceive(context, intent);
 		}
@@ -89,6 +99,7 @@ public class NetworkWidget extends AppWidgetProvider{
 			//networkInfo = state.getOperatorAlphaLong();
 			TelephonyManager telManager = (TelephonyManager) context.getSystemService( Context.TELEPHONY_SERVICE);
 			networkInfo = telManager.getNetworkOperatorName() + " " + telManager.getNetworkCountryIso().toUpperCase();
+			
 		}
 
 		else if( connType == ConnectivityManager.TYPE_WIFI ){
@@ -114,10 +125,11 @@ public class NetworkWidget extends AppWidgetProvider{
 		Log.d(  LOG_TAG, "Update the view -> " + networkInfo);
 
 		
-		Intent intent = new Intent( WIFI_TOGGLE);
-		
+		Intent intent = new Intent( context,  NetworkWidget.class);
+		intent.setAction( WIFI_TOGGLE);
         PendingIntent pIntent =  PendingIntent.getBroadcast(context, 0, intent, 0);
-		
+        
+
 		views.setOnClickPendingIntent(R.id.ImageViewType, pIntent);
 		
 		
