@@ -63,8 +63,15 @@ public class NetworkWidget extends AppWidgetProvider{
 		} else if( WIFI_TOGGLE.equals(action)){
 			Log.d( LOG_TAG, "Toggle wifi");
 			WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
-			if( !wifiManager.isWifiEnabled() )
+			if( !wifiManager.isWifiEnabled() ){
+				Bitmap theImage;
+				Resources res = context.getResources();
+				theImage = BitmapFactory.decodeResource(res, R.drawable.wifi_connecting_32);
+				theImage = Bitmap.createBitmap(theImage);
+				RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.network_widget);
+				views.setImageViewBitmap( R.id.ImageViewType, theImage );	
 				wifiManager.setWifiEnabled( true);
+			}
 			else 
 				wifiManager.setWifiEnabled(false);
 		}
@@ -95,8 +102,6 @@ public class NetworkWidget extends AppWidgetProvider{
 
 		if( connType == ConnectivityManager.TYPE_MOBILE ){
 			theImage = BitmapFactory.decodeResource(res, R.drawable.mobile_32);
-			//ServiceState state = new ServiceState();
-			//networkInfo = state.getOperatorAlphaLong();
 			TelephonyManager telManager = (TelephonyManager) context.getSystemService( Context.TELEPHONY_SERVICE);
 			networkInfo = telManager.getNetworkOperatorName() + " " + telManager.getNetworkCountryIso().toUpperCase();
 			

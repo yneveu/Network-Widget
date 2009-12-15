@@ -20,6 +20,8 @@ public final class R {
         public static final int widget_bg_white=0x7f020006;
         public static final int wifi_16=0x7f020007;
         public static final int wifi_32=0x7f020008;
+        public static final int wifi_connected_32=0x7f020009;
+        public static final int wifi_connecting_32=0x7f02000a;
     }
     public static final class id {
         public static final int ImageViewType=0x7f060001;
