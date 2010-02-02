@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+  xmlns:android="http://schemas.android.com/apk/res/android">
+  
+  <PreferenceCategory android:title="Notifications">
+<CheckBoxPreference
+android:title="Vibrate on network change"
+android:defaultValue="false"
+android:summary="Vibrate when a change appears on network"
+android:key="vibrateNotification" 
+/>
+</PreferenceCategory>
+<!-- 
+<EditTextPreference
+android:summary="Number of vibrations"
+android:defaultValue="1"
+android:title="How many time will it vribate?"
+android:key="vibrateNumber" 
+android:numeric="integer" 
+android:maxLength="1" 
+/>
+
+
+
+<PreferenceCategory android:title="Second Category">
+
+<RingtonePreference
+android:name="Ringtone Preference"
+android:summary="Select a ringtone"
+android:title="Ringtones"
+android:key="ringtonePref" />
+</PreferenceCategory>
+   -->
+</PreferenceScreen>

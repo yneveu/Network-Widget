@@ -1,4 +1,4 @@
-<LinearLayout
+ <LinearLayout
   xmlns:android="http://schemas.android.com/apk/res/android"
   android:id="@+id/network_widget" 
   android:layout_width="fill_parent"
@@ -42,6 +42,8 @@ android:layout_weight="1"
     android:gravity="center_vertical"
 android:paddingTop="5dip">
 </TextView>
+
+
 </LinearLayout>
 
 

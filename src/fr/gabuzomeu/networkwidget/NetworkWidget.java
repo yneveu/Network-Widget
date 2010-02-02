@@ -1,27 +1,35 @@
 package fr.gabuzomeu.networkwidget;
 
+import java.lang.reflect.Array;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Enumeration;
 
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.net.Uri;
-import android.net.NetworkInfo.State;
 import android.net.wifi.WifiManager;
-import android.telephony.ServiceState;
+import android.os.Vibrator;
+import android.preference.Preference;
+import android.preference.PreferenceManager;
+import android.telephony.CellLocation;
 import android.telephony.TelephonyManager;
+
 import android.util.Log;
 import android.widget.RemoteViews;
+import android.widget.Toast;
 
 
 
@@ -32,11 +40,13 @@ public class NetworkWidget extends AppWidgetProvider{
 	final String LOG_TAG="Network Widget";
 	
 	private static final String WIFI_TOGGLE = "fr.gabuzomeu.NetworkWidget.WIFI_TOGGLE";
-
+	private static final String NETWIDG_PREFS = "fr.gabuzomeu.NetworkWidget.NETWIDG_PREFS";
 
 	@Override
 	public void onReceive(Context context, Intent intent) {
 
+		widgetManager = AppWidgetManager.getInstance(context);
+		
 		final String action = intent.getAction();
 		if (AppWidgetManager.ACTION_APPWIDGET_DELETED.equals(action)) {
 			final int appWidgetId = intent.getExtras().getInt(
@@ -47,16 +57,17 @@ public class NetworkWidget extends AppWidgetProvider{
 			}
 		}else if( android.net.ConnectivityManager.CONNECTIVITY_ACTION.equals( action)  ){
 			Log.d( LOG_TAG, "Connectivity change");
-
+			
+			
+			
+			
 			ConnectivityManager connManager = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE); 
 			if( connManager.getActiveNetworkInfo() != null)
 				Log.d( LOG_TAG, connManager.getActiveNetworkInfo().getTypeName());
 
 
 			if( intent.getAction() != null){
-
 				onUpdate(context, AppWidgetManager.getInstance(context), new int[]{ 0 });
-
 			}
 			
 			
@@ -70,15 +81,32 @@ public class NetworkWidget extends AppWidgetProvider{
 				theImage = Bitmap.createBitmap(theImage);
 				RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.network_widget);
 				views.setImageViewBitmap( R.id.ImageViewType, theImage );	
-				wifiManager.setWifiEnabled( true);
+				
+				
+				if( widgetManager != null ){
+					Toast.makeText(context, "Enabling wifi", Toast.LENGTH_SHORT).show(); 
+					wifiManager.setWifiEnabled( true);
+					Log.d( LOG_TAG, "WIFI ENABLING ICON" + action.toString() );
+					widgetManager.updateAppWidget( thisWidget, views);
+				}
 			}
-			else 
+			else {
+				Toast.makeText(context, "Disabling wifi", Toast.LENGTH_SHORT).show();
 				wifiManager.setWifiEnabled(false);
+			}
 		}
-		
+	 else if( NETWIDG_PREFS.equals(action)){
+			Log.d( LOG_TAG, "Open prefs");
+			Intent prefsActivity = new Intent( context , PreferencesActivity.class);
+			context.startActivity(prefsActivity);
+
+	 }
 		
 		else {	
-			Log.d( LOG_TAG, "Other Action" + action.toString() );
+			if( action != null)
+				Log.d( LOG_TAG, "Other Action" + action.toString() );
+			else
+				Log.d( LOG_TAG, "Action NULL" );
 
 			super.onReceive(context, intent);
 		}
@@ -103,6 +131,7 @@ public class NetworkWidget extends AppWidgetProvider{
 		if( connType == ConnectivityManager.TYPE_MOBILE ){
 			theImage = BitmapFactory.decodeResource(res, R.drawable.mobile_32);
 			TelephonyManager telManager = (TelephonyManager) context.getSystemService( Context.TELEPHONY_SERVICE);
+			//CellLocation loc = (CellLocation) telManager.getCellLocation();
 			networkInfo = telManager.getNetworkOperatorName() + " " + telManager.getNetworkCountryIso().toUpperCase();
 			
 		}
@@ -123,22 +152,43 @@ public class NetworkWidget extends AppWidgetProvider{
 
 
 		views.setTextViewText( R.id.TextViewAdress, getLocalIpAddress() );
-
-
 		views.setTextViewText( R.id.TextViewNetwork , networkInfo  );
 
 		Log.d(  LOG_TAG, "Update the view -> " + networkInfo);
-
 		
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+		
+		if( prefs != null ){
+			if( networkInfo.compareTo("Unknown") != 0){
+				boolean bVibrate = prefs.getBoolean( "vibrateNotification", false);
+				if( bVibrate){
+					Vibrator v = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
+					//for( int i=0; i <= Integer.parseInt( prefs.getString( "vibrateNumber", "1")); i++ ){
+					v.vibrate(500); 
+					//long[] pattern = { 500,300}; 
+					//v.vibrate( pattern , Integer.parseInt( prefs.getString( "vibrateNumber", "1")));
+					//}
+				}
+			}
+		}
+		
+		//Click on image to toggle wifi
 		Intent intent = new Intent( context,  NetworkWidget.class);
 		intent.setAction( WIFI_TOGGLE);
         PendingIntent pIntent =  PendingIntent.getBroadcast(context, 0, intent, 0);
-        
-
 		views.setOnClickPendingIntent(R.id.ImageViewType, pIntent);
 		
+		//Click on text to open prefs activity
+		Intent prIntent = new Intent( context,  PreferencesActivity.class);
+		//prIntent.setAction( NETWIDG_PREFS);
+		prIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK); 
+        //PendingIntent ppIntent =  PendingIntent.getBroadcast(context, 0, prIntent,Intent.FLAG_ACTIVITY_NEW_TASK );
 		
-		// Tell the AppWidgetManager to perform an update on the current App Widget
+        PendingIntent ppIntent = PendingIntent.getActivity(context, 0, prIntent, Intent.FLAG_ACTIVITY_NEW_TASK); 
+        
+        views.setOnClickPendingIntent(R.id.LinearLayout01, ppIntent);
+		
+		
 		if( widgetManager != null )
 			widgetManager.updateAppWidget( thisWidget, views);
 
@@ -172,7 +222,7 @@ public class NetworkWidget extends AppWidgetProvider{
         RemoteViews remoteView = new RemoteViews(context.getPackageName(), R.layout.network_widget );
         String controlType = data.getFragment();
 
-        Log.e(LOG_TAG, "onHandleAtion: " + controlType); 
+        Log.e(LOG_TAG, "onHandleAction: " + controlType); 
 
     }
 	
