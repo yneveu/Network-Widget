@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="hello">Hello World!</string>
-    <string name="app_name">Network Widget</string>
+	<string name="app_name">Network Widget</string>
+	<string name="black">Black</string>
+	<string name="transparent">Transparent</string>
+
+	<string name="select_appareance">Choose widget appearance</string>
+
+	<string name="vibrate_on_change">Vibrate on network change</string>
+	<string name="desc_vibrate_on_change">Vibrate when a change appears on network</string>
+
+	<string name="unknown_network">Unknown network</string>
+	<string name="unknown_address">Unknown address</string>
 </resources>

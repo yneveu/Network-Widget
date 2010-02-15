@@ -23,6 +23,8 @@ public class PreferencesActivity extends PreferenceActivity {
 	//Get the custom preference
 	Preference customPref = (Preference) findPreference("vibrateNotification");
 	
+	
+	
 	}
 
 	
