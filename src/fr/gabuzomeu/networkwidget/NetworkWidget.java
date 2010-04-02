@@ -5,6 +5,9 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Enumeration;
 
+import com.flurry.android.FlurryAgent;
+
+import android.app.Activity;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
@@ -20,6 +23,8 @@ import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
+import android.provider.Settings;
+import android.sax.StartElementListener;
 import android.telephony.TelephonyManager;
 import android.text.Layout;
 import android.util.Log;
@@ -44,8 +49,8 @@ public class NetworkWidget extends AppWidgetProvider{
 	
 	final String LOG_TAG="Network Widget";
 	
-	private static final String WIFI_TOGGLE = "fr.gabuzomeu.NetworkWidget.WIFI_TOGGLE";
-	private static final String NETWIDG_PREFS = "fr.gabuzomeu.NetworkWidget.NETWIDG_PREFS";
+	static final String WIFI_TOGGLE = "fr.gabuzomeu.NetworkWidget.WIFI_TOGGLE";
+	static final String NETWIDG_PREFS = "fr.gabuzomeu.NetworkWidget.NETWIDG_PREFS";
 
 	@Override
 	public void onReceive(Context context, Intent intent) {
@@ -56,7 +61,7 @@ public class NetworkWidget extends AppWidgetProvider{
 		/**Called when the widget is destroyed*/
 		
 		final String action = intent.getAction();
-		if (AppWidgetManager.ACTION_APPWIDGET_DELETED.equals(action)) {
+		if ( AppWidgetManager.ACTION_APPWIDGET_DELETED.equals(action)) {
 			final int appWidgetId = intent.getExtras().getInt(
 					AppWidgetManager.EXTRA_APPWIDGET_ID,
 					AppWidgetManager.INVALID_APPWIDGET_ID);
@@ -64,6 +69,8 @@ public class NetworkWidget extends AppWidgetProvider{
 				this.onDeleted(context, new int[] { appWidgetId });
 			}
 		
+		
+			
 		
 		/**Called on connectivity changes**/
 		}else if( android.net.ConnectivityManager.CONNECTIVITY_ACTION.equals( action)  ){
@@ -108,15 +115,30 @@ public class NetworkWidget extends AppWidgetProvider{
 	/** Called when click on right part*/	
 	 else if( NETWIDG_PREFS.equals(action)){
 			Log.d( LOG_TAG, "Open prefs");
-			Intent prefsActivity = new Intent( context , PreferencesActivity.class);
-			context.startActivity(prefsActivity);
-			
+			//Intent prefsActivity = new Intent( context , PreferencesActivity.class);
+			//context.startActivity(prefsActivity);
+			context.startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS));
 			
 	 }
 		
+	 else if( AppWidgetManager.ACTION_APPWIDGET_ENABLED.equals( action)){
+			Log.d( LOG_TAG, "ENABLED ");
+		//	Intent prIntent = new Intent( context,  PreferencesActivity.class);
+		//	prIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK); 
+		//	stateChanged = true;
+	      //  context.startActivity( prIntent);
+	        
+		}
+		
+		
 		else {	
-			if( action != null)
-				Log.d( LOG_TAG, "Other Action" + action.toString() );
+			if( action != null){
+				Log.d( LOG_TAG, "Other Action " + action.toString() );
+				ComponentName thisWidget = new ComponentName(context, NetworkWidget.class);
+				 AppWidgetManager manager = AppWidgetManager.getInstance( context);
+				stateChanged = true;
+				 manager.updateAppWidget( thisWidget, views);
+			}
 			else
 				Log.d( LOG_TAG, "Action NULL" );
 
@@ -130,13 +152,17 @@ public class NetworkWidget extends AppWidgetProvider{
 
 
 	public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
+		
+		
+		 //FlurryAgent.setLogEnabled( true);
+		
 		widgetManager = appWidgetManager;
 		ComponentName thisWidget = new ComponentName(context, NetworkWidget.class);
 		
 		 SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 			if( prefs != null){
 				String appearance = prefs.getString( "selectedAppearance", "transparent");
-				Log.d(  LOG_TAG, "Appareance:" + appearance);
+				//Log.d(  LOG_TAG, "Appareance:" + appearance);
 				
 				if( appearance.compareTo( "transparent") == 0)
 						currentLayout = R.layout.network_widget_transparent;
@@ -161,9 +187,9 @@ public class NetworkWidget extends AppWidgetProvider{
 		views.setOnClickPendingIntent(R.id.ImageViewType, pIntent);
 		
 		//Click on text to open prefs activity
-		Intent prIntent = new Intent( context,  PreferencesActivity.class);
+		Intent prIntent = new Intent( Settings.ACTION_WIFI_SETTINGS);
+		//context.startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS));
 		prIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK); 
-        		
         PendingIntent ppIntent = PendingIntent.getActivity(context, 0, prIntent, Intent.FLAG_ACTIVITY_NEW_TASK); 
         views.setOnClickPendingIntent(R.id.LinearLayout01, ppIntent);
 		
@@ -177,8 +203,6 @@ public class NetworkWidget extends AppWidgetProvider{
 			connType = connManager.getActiveNetworkInfo().getType();
 			if( connType != currentDataType){
 				stateChanged = true;
-				Log.d(  LOG_TAG, "TRUE: Type changed:" + currentDataType + " -> " + connType);
-				Log.d(  LOG_TAG, "Changement de type de connexion -> stateChanged a true");
 			}
 
 		
@@ -202,15 +226,9 @@ public class NetworkWidget extends AppWidgetProvider{
 			};
 			
 			
-			
-			
-			
-			
-			if( networkInfo.compareTo( networkName) != 0 ){
-				Log.d(  LOG_TAG, "TRUE: Network Name changed:" + networkName + " -> " + networkInfo);
-				Log.d(  LOG_TAG, "Changement de nom -> stateChanged a true");
+			if( networkInfo.compareTo( networkName) != 0 )
 				stateChanged = true;
-			}
+			
 		
 		//**Transitional state*/
 		} else {
@@ -219,6 +237,7 @@ public class NetworkWidget extends AppWidgetProvider{
 			
 			
 		/**State have changed we do something*/
+		
 		if( stateChanged){
 			/*Graphics changes*/
 			theImage = Bitmap.createBitmap(theImage);
@@ -268,7 +287,7 @@ public class NetworkWidget extends AppWidgetProvider{
 		
 		
 		
-		stateChanged = false;
+		//stateChanged = false;
 		Log.d(  LOG_TAG, "stateChanged a false");
 	}
 
@@ -304,6 +323,10 @@ public class NetworkWidget extends AppWidgetProvider{
     }
 	
 	
+	@Override
+	public void onDeleted(Context context, int[] appWidgetIds) {
+		FlurryAgent.onEndSession( context);
+	}
 	
 	
 	

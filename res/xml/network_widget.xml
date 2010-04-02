@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <appwidget-provider 
-xmlns:android="http://schemas.android.com/apk/res/android" 
-android:updatePeriodMillis="360000" android:minWidth="146dp" 
-android:minHeight="72dp" 
-android:initialLayout="@layout/network_widget_black">
-    
-    
+	xmlns:android="http://schemas.android.com/apk/res/android" 
+	android:updatePeriodMillis="360000" android:minWidth="146dp" 
+	android:minHeight="72dp" 
+	android:initialLayout="@layout/network_widget_black"
+	android:configure="fr.gabuzomeu.networkwidget.PreferencesActivity"    
+>    
 </appwidget-provider>
